@@ -227,27 +227,37 @@ ${formData.comment || 'Не указан'}
 🎅 Заявка отправлена: ${new Date().toLocaleString('ru-RU')}
       `.trim();
 
-      // Здесь вы можете добавить свой Telegram Bot Token и Chat ID
-      const TELEGRAM_BOT_TOKEN = 'YOUR_BOT_TOKEN'; // Замените на ваш токен
-      const TELEGRAM_CHAT_ID = 'YOUR_CHAT_ID'; // Замените на ваш chat ID
+      // Telegram Bot настройки
+      const TELEGRAM_BOT_TOKEN = '8340073651:AAGUDjyGkfJtrPsLCMaCTBgyedSEqajT7mk';
+      const TELEGRAM_CHAT_IDS = ['7552690430', '8218886620']; // Отправка на оба чата
 
-      // Отправка в Telegram (раскомментируйте и добавьте реальные данные)
-      /*
-      const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          chat_id: TELEGRAM_CHAT_ID,
-          text: message,
-          parse_mode: 'Markdown',
-        }),
-      });
-      */
+      // Отправка в Telegram на оба чата
+      const sendPromises = TELEGRAM_CHAT_IDS.map(chatId =>
+        fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            chat_id: chatId,
+            text: message,
+            parse_mode: 'Markdown',
+          }),
+        })
+      );
 
-      // Для демонстрации просто показываем алерт
-      console.log("Сообщение для Telegram:", message);
+      // Ждем отправки на оба чата
+      const responses = await Promise.all(sendPromises);
+
+      // Проверяем успешность отправки
+      const allSuccess = responses.every(r => r.ok);
+
+      if (!allSuccess) {
+        console.error("Ошибка отправки в Telegram");
+        throw new Error("Telegram send failed");
+      }
+
+      console.log("✅ Заявка успешно отправлена в Telegram");
 
       // Запускаем салют!
       setShowFireworks(true);
